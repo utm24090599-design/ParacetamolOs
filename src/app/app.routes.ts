@@ -1,6 +1,14 @@
 import { Routes } from '@angular/router';
-import { LandingPage } from './features/landing/pages/landing-page/landing-page';
 
 export const routes: Routes = [
-  { path: '', component: LandingPage }
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/register/register').then(m => m.RegisterComponent)
+  },
+  {
+    path: '',
+    redirectTo: 'register',
+    pathMatch: 'full'
+  }
 ];
