@@ -18,12 +18,91 @@ import { AppointmentRepository } from '../../../core/repositories/appointment.re
     <div class="min-h-[calc(100vh-60px)] bg-[#F2F2F7] flex items-center justify-center px-4 py-8">
       <div class="w-full max-w-md">
 
-        <!-- STEP: Selección de cita (minimalista) -->
-        @if (vm.step() === 'schedule') {
+        @if (formStep() === 'form') {
+          <div class="bg-white border border-[#E5E5EA] rounded-[32px] shadow-sm p-6">
+            <h1 class="text-2xl font-bold text-[#121212] mb-1">Datos Personales</h1>
+            <p class="text-sm text-[#3A3A3C] mb-6">Completa tus datos para continuar con el agendamiento.</p>
+
+            <div class="grid gap-4">
+              <div class="grid grid-cols-2 gap-3">
+                <label class="flex flex-col text-sm text-[#3A3A3C] gap-2">
+                  <span class="font-semibold">Nombre(s)</span>
+                  <input
+                    type="text"
+                    [ngModel]="name()"
+                    (ngModelChange)="name.set($event)"
+                    class="rounded-lg border border-[#D1D1D6] bg-[#F7F7F8] px-3 py-2 text-sm text-[#121212] outline-none focus:border-[#007AFF] focus:ring-1 focus:ring-[#007AFF]/20"
+                    placeholder="Nombre(s)"
+                  />
+                </label>
+
+                <label class="flex flex-col text-sm text-[#3A3A3C] gap-2">
+                  <span class="font-semibold">Apellido(s)</span>
+                  <input
+                    type="text"
+                    [ngModel]="lastName()"
+                    (ngModelChange)="lastName.set($event)"
+                    class="rounded-lg border border-[#D1D1D6] bg-[#F7F7F8] px-3 py-2 text-sm text-[#121212] outline-none focus:border-[#007AFF] focus:ring-1 focus:ring-[#007AFF]/20"
+                    placeholder="Apellido(s)"
+                  />
+                </label>
+              </div>
+
+              <div class="grid gap-3">
+                <div class="flex items-center gap-4 text-sm text-[#3A3A3C]">
+                  <span class="font-semibold">Género</span>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="gender" value="female" [ngModel]="gender()" (ngModelChange)="gender.set($event)" class="h-4 w-4 text-[#007AFF]" />
+                    <span>Mujer</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="gender" value="male" [ngModel]="gender()" (ngModelChange)="gender.set($event)" class="h-4 w-4 text-[#007AFF]" />
+                    <span>Hombre</span>
+                  </label>
+                </div>
+
+                <label class="flex flex-col text-sm text-[#3A3A3C] gap-2">
+                  <span class="font-semibold">Edad</span>
+                  <input
+                    type="number"
+                    [ngModel]="age()"
+                    (ngModelChange)="age.set($event)"
+                    class="rounded-lg border border-[#D1D1D6] bg-[#F7F7F8] px-3 py-2 text-sm text-[#121212] outline-none focus:border-[#007AFF] focus:ring-1 focus:ring-[#007AFF]/20"
+                    placeholder="Edad"
+                    min="0"
+                  />
+                </label>
+
+                <label class="flex flex-col text-sm text-[#3A3A3C] gap-2">
+                  <span class="font-semibold">Correo Electrónico</span>
+                  <input
+                    type="email"
+                    [ngModel]="email()"
+                    (ngModelChange)="email.set($event)"
+                    class="rounded-lg border border-[#D1D1D6] bg-[#F7F7F8] px-3 py-2 text-sm text-[#121212] outline-none focus:border-[#007AFF] focus:ring-1 focus:ring-[#007AFF]/20"
+                    placeholder="Correo Electrónico"
+                  />
+                </label>
+              </div>
+            </div>
+
+            @if (vm.error()) {
+              <p class="text-[#FF3B30] text-xs mt-4">{{ vm.error() }}</p>
+            }
+
+            <button
+              (click)="goToSchedule()"
+              [disabled]="!isFormValid"
+              class="mt-6 w-full rounded-lg bg-[#121212] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50">
+              Ver fechas disponibles
+            </button>
+          </div>
+        }
+
+        @if (formStep() === 'schedule') {
           <div class="bg-white rounded-2xl shadow-sm p-6">
             <h1 class="text-2xl font-bold text-[#121212] mb-4">Agendar Cita</h1>
 
-            <!-- Selección de doctor -->
             <div class="mb-5">
               <label class="block text-xs font-semibold text-[#3A3A3C] mb-2">A quién te gustaría atender?</label>
               <div class="flex flex-col gap-2">
@@ -44,7 +123,6 @@ import { AppointmentRepository } from '../../../core/repositories/appointment.re
               </div>
             </div>
 
-            <!-- Slots disponibles (compacto) -->
             @if (vm.selectedDoctor()) {
               @if (vm.loading()) {
                 <div class="flex justify-center py-4">
@@ -99,7 +177,6 @@ import { AppointmentRepository } from '../../../core/repositories/appointment.re
           </div>
         }
 
-        <!-- STEP: Confirmación -->
         @if (vm.step() === 'done') {
           <div class="bg-white rounded-2xl shadow-sm p-6 text-center">
             <div class="text-5xl mb-3">✅</div>
@@ -116,7 +193,7 @@ import { AppointmentRepository } from '../../../core/repositories/appointment.re
               </div>
             }
             <button
-              (click)="vm.reset(); router.navigate(['/'])"
+              (click)="reset()"
               class="w-full bg-[#121212] text-white font-semibold py-2.5 rounded-lg text-sm hover:opacity-80 transition-opacity">
               Volver al inicio
             </button>
@@ -130,6 +207,12 @@ import { AppointmentRepository } from '../../../core/repositories/appointment.re
 export class PersonalDataPage implements OnInit {
   doctors   = signal<Doctor[]>([]);
   selectedDate = signal<string | null>(null);
+  formStep = signal<'form' | 'schedule'>('form');
+  name = signal('');
+  lastName = signal('');
+  gender = signal<'female' | 'male'>('female');
+  age = signal('');
+  email = signal('');
 
   constructor(
     readonly vm: AppointmentViewModel,
@@ -164,7 +247,38 @@ export class PersonalDataPage implements OnInit {
       this.vm.availableSlots().filter(s => s.date === this.selectedDate());
   }
 
+  get isFormValid(): boolean {
+    return (
+      this.name().trim().length > 0 &&
+      this.lastName().trim().length > 0 &&
+      this.age().trim().length > 0 &&
+      this.email().trim().length > 0 &&
+      this.email().includes('@')
+    );
+  }
+
+  goToSchedule(): void {
+    if (!this.isFormValid) {
+      this.vm.error.set('Por favor llena todos los campos correctamente.');
+      return;
+    }
+
+    this.vm.error.set(null);
+    this.formStep.set('schedule');
+  }
+
   async confirm(): Promise<void> {
     await this.vm.confirmAppointment();
+  }
+
+  reset(): void {
+    this.formStep.set('form');
+    this.name.set('');
+    this.lastName.set('');
+    this.gender.set('female');
+    this.age.set('');
+    this.email.set('');
+    this.selectedDate.set(null);
+    this.vm.reset();
   }
 }
